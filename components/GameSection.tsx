@@ -189,6 +189,7 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
     };
 
     const resetGame = () => {
+      audioService.play('gameOver');
       gameRunning = false;
       gamePaused = false;
       clearInterval(gameInterval);
@@ -205,6 +206,8 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
 
     (window as any).startMobileGame = () => {
       if (gameRunning && !gamePaused) return;
+      // Unlock audio on iOS when starting game
+      audioService.unlock();
       gameRunning = true;
       gamePaused = false;
       if (mobileOverlay) mobileOverlay.style.display = 'none';
