@@ -7,31 +7,52 @@ class AudioService {
   private audioContext: AudioContext | null = null;
   private isUnlocked: boolean = false;
 
-  // Initialize and unlock audio context on first user interaction
-  unlock(): void {
-    if (this.isUnlocked) return;
+  constructor() {
+    // Try to create AudioContext immediately
+    this.initContext();
+  }
+
+  private initContext(): void {
+    if (this.audioContext) return;
 
     try {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContextClass) return;
+      if (AudioContextClass) {
+        this.audioContext = new AudioContextClass();
+      }
+    } catch (e) {
+      // Will try again on user interaction
+    }
+  }
 
-      this.audioContext = new AudioContextClass();
+  // Initialize and unlock audio context on first user interaction
+  unlock(): void {
+    if (this.isUnlocked && this.audioContext?.state === 'running') return;
+
+    try {
+      // Create context if not exists
+      if (!this.audioContext) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContextClass) return;
+        this.audioContext = new AudioContextClass();
+      }
 
       // iOS Safari requires resume() after user gesture
       if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume().then(() => {
-          this.isUnlocked = true;
-        });
-      } else {
-        this.isUnlocked = true;
+        this.audioContext.resume();
       }
 
-      // Play a silent sound to fully unlock on iOS
-      const buffer = this.audioContext.createBuffer(1, 1, 22050);
-      const source = this.audioContext.createBufferSource();
-      source.buffer = buffer;
-      source.connect(this.audioContext.destination);
-      source.start(0);
+      // Play a silent oscillator to fully unlock on iOS
+      // This is more reliable than buffer on some iOS versions
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+      gain.gain.value = 0; // Silent
+      osc.connect(gain);
+      gain.connect(this.audioContext.destination);
+      osc.start(0);
+      osc.stop(this.audioContext.currentTime + 0.001);
+
+      this.isUnlocked = true;
     } catch (e) {
       console.warn('Audio unlock failed:', e);
     }
@@ -39,9 +60,16 @@ class AudioService {
 
   // Play a retro-style sound effect
   play(type: SoundType): void {
-    if (!this.audioContext || this.audioContext.state === 'suspended') {
-      // Try to resume if suspended
-      this.audioContext?.resume();
+    // Always try to unlock/resume first
+    if (!this.audioContext) {
+      this.initContext();
+    }
+
+    if (this.audioContext?.state === 'suspended') {
+      this.audioContext.resume();
+    }
+
+    if (!this.audioContext || this.audioContext.state !== 'running') {
       return;
     }
 
@@ -191,18 +219,28 @@ class AudioService {
 export const audioService = new AudioService();
 
 // Auto-unlock on first user interaction
+// iOS requires non-passive listeners and immediate handling
 if (typeof window !== 'undefined') {
+  let unlocked = false;
+
   const unlockAudio = () => {
+    if (unlocked) return;
+    unlocked = true;
+
     audioService.unlock();
-    // Remove listeners after first interaction
-    document.removeEventListener('touchstart', unlockAudio);
-    document.removeEventListener('touchend', unlockAudio);
-    document.removeEventListener('click', unlockAudio);
-    document.removeEventListener('keydown', unlockAudio);
+
+    // Remove all listeners after first successful unlock
+    document.removeEventListener('touchstart', unlockAudio, true);
+    document.removeEventListener('touchend', unlockAudio, true);
+    document.removeEventListener('click', unlockAudio, true);
+    document.removeEventListener('keydown', unlockAudio, true);
+    document.removeEventListener('mousedown', unlockAudio, true);
   };
 
-  document.addEventListener('touchstart', unlockAudio, { passive: true });
-  document.addEventListener('touchend', unlockAudio, { passive: true });
-  document.addEventListener('click', unlockAudio, { passive: true });
-  document.addEventListener('keydown', unlockAudio, { passive: true });
+  // Use capture phase (true) for earlier event handling on iOS
+  document.addEventListener('touchstart', unlockAudio, { capture: true, passive: true });
+  document.addEventListener('touchend', unlockAudio, { capture: true, passive: true });
+  document.addEventListener('click', unlockAudio, { capture: true, passive: true });
+  document.addEventListener('keydown', unlockAudio, { capture: true, passive: true });
+  document.addEventListener('mousedown', unlockAudio, { capture: true, passive: true });
 }

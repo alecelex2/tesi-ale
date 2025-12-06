@@ -102,6 +102,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onOpenChange }) =
   };
 
   const toggleOpen = () => {
+    // Explicitly unlock audio on iOS on first interaction
+    audioService.unlock();
     playRetroSound('click');
     onOpenChange(!isOpen);
   };

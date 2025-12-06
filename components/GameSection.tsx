@@ -41,6 +41,8 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
 
   // Open mobile fullscreen
   const openMobileGame = () => {
+    // Explicitly unlock audio on iOS
+    audioService.unlock();
     setIsMobileFullscreen(true);
     setTimeout(() => {
       (window as any).startGame?.();
