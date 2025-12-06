@@ -1,0 +1,8 @@
+{
+  "name": "Alessio Celentano Thesis AI",
+  "description": "Interactive thesis presentation on Fast Fashion vs Sustainability with integrated Gemini AI analysis.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

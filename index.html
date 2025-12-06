@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fast Fashion Sucks - Tesi di Laurea</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Rock+Salt&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Space Grotesk', 'sans-serif'],
+              display: ['Syne', 'sans-serif'],
+              game: ['DM Sans', 'sans-serif'],
+              scratch: ['Rock Salt', 'cursive'],
+            },
+            colors: {
+              genz: {
+                neon: '#D4FF00', // Acid Lime
+                purple: '#9D4EDD', // Electric Purple
+                black: '#0a0a0a',
+                white: '#ffffff',
+                gray: '#f3f3f3',
+              }
+            },
+            boxShadow: {
+              'brutal': '4px 4px 0px 0px #000000',
+              'brutal-lg': '8px 8px 0px 0px #000000',
+              'brutal-hover': '2px 2px 0px 0px #000000',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* LARGE WINDOWS 95 STYLE PIXELATED CURSOR - Default Arrow */
+      body, input, select, textarea {
+        cursor: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTAgMEgyVjFIM1YySDRWM0g1VjRINlY1SDdWNkg4VjdHOVY4SDEwVjlIMTFWMTBIMTJWMTRIMTNWMTJIMTRWMTNIMTVWMTlIMTZWMTdIMTdWMTlIMThWMjFIMTdWMjJIMUMTNiWg1VjI0SDEzVjIzSDEyVjIxSDExVjE5SDEwVjE4SDlWMTZIOFYxNUg3VjE0SDZWMTNINVYxMkg0VjExSDNWMTBIMlY5SDFWOEgyVjFIMFoiIGZpbGw9IndoaXRlIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyIvPjwvc3ZnPg==") 0 0, auto;
+      }
+
+      /* Pointer/Hand cursor for clickable elements */
+      button, a, .cursor-pointer, [role="button"] {
+        cursor: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTEgMTBWMjJIMTNWMTZIMTRWMTdIMTVWMjJIMTdWMTdIMThWMTZIMTlWMjJIMjFWMTZIMjJWMTVIMjNWMjJIMjVWMTRIMjRWMTNIMjNWMTJIMjJWMTFIMjFWMTBIMjBWOUgxOVY4SDE4VjdIMTdWNkgxNlY1SDE1VjRIMTRWNUgxM1Y2SDEyVjdIMTFWOEgxMFY5SDExVjEwWiIgZmlsbD0id2hpdGUiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==") 10 0, pointer;
+      }
+
+      body {
+        background-color: #ffffff;
+        color: #0a0a0a;
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f3f3f3;
+        border-left: 1px solid #000;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #D4FF00;
+        border: 1px solid #000;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #bce600;
+      }
+      .text-stroke {
+        -webkit-text-stroke: 1px black;
+        color: transparent;
+      }
+      .text-stroke-lg {
+        -webkit-text-stroke: 3px black;
+        color: transparent;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
