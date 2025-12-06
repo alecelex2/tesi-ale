@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { ThesisSection } from '../types';
 import { Star, Hexagon, Circle } from 'lucide-react';
 
@@ -145,17 +145,28 @@ const Section: React.FC<SectionProps> = ({ data, index }) => {
     color: string,
     delay?: number,
     targetTextColor?: string
-  }) => (
-    <span className="relative inline-block mx-1 md:mx-2 align-bottom">
-      <span
-        className="absolute inset-0 -z-10"
-        style={{ backgroundColor: color }}
-      />
-      <span className="relative px-1 block" style={{ color: targetTextColor }}>
-        {text}
+  }) => {
+    const ref = useRef<HTMLSpanElement>(null);
+    const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+    return (
+      <span ref={ref} className="relative inline-block mx-1 md:mx-2">
+        <motion.span
+          className="absolute inset-0"
+          style={{ backgroundColor: color }}
+          initial={false}
+          animate={{
+            transform: isInView ? "scaleX(1)" : "scaleX(0)",
+            transformOrigin: "left"
+          }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: delay }}
+        />
+        <span className="relative px-2 py-1" style={{ color: targetTextColor }}>
+          {text}
+        </span>
       </span>
-    </span>
-  );
+    );
+  };
 
   // Custom Title Rendering per Section
   const renderAnimatedTitle = () => {
@@ -163,16 +174,16 @@ const Section: React.FC<SectionProps> = ({ data, index }) => {
       case 0: // Intro: "Fast Fashion SUCKS?" (Red)
         return (
           <h2 className="font-display text-4xl md:text-5xl lg:text-7xl font-bold text-black mb-6 leading-[0.9] uppercase tracking-tight">
-            Fast Fashion{' '}
+            <span>Fast Fashion </span>
             <HighlightWord text="Sucks?" color="#FF2A2A" />
           </h2>
         );
-        
+
       case 1: // Shein: "ULTRA Fast Fashion" (Purple)
         return (
           <h2 className="font-display text-4xl md:text-5xl lg:text-7xl font-bold text-black mb-6 leading-[0.9] uppercase tracking-tight">
             <HighlightWord text="Ultra" color="#C026D3" />
-            Fast Fashion
+            <span> Fast Fashion</span>
           </h2>
         );
 
@@ -180,14 +191,14 @@ const Section: React.FC<SectionProps> = ({ data, index }) => {
         return (
           <h2 className="font-display text-4xl md:text-5xl lg:text-7xl font-bold text-black mb-6 leading-[0.9] uppercase tracking-tight">
             <HighlightWord text="Stakeholder" color="#FF5F00" />
-            Theory
+            <span> Theory</span>
           </h2>
         );
 
       case 3: // Metaverse: "Into the METAVERSE" (Deep Blue)
         return (
           <h2 className="font-display text-4xl md:text-5xl lg:text-7xl font-bold text-black mb-6 leading-[0.9] uppercase tracking-tight">
-            Into the
+            <span>Into the </span>
             <HighlightWord text="Metaverse" color="#0033FF" />
           </h2>
         );
@@ -196,16 +207,16 @@ const Section: React.FC<SectionProps> = ({ data, index }) => {
         return (
           <h2 className="font-display text-4xl md:text-5xl lg:text-7xl font-bold text-black mb-6 leading-[0.9] uppercase tracking-tight">
             <HighlightWord text="Gen Z" color="#FFFF00" targetTextColor="#000000" />
-            & Green
+            <span> & Green </span>
             <HighlightWord text="Gap" color="#FFFF00" delay={0.2} targetTextColor="#000000" />
           </h2>
         );
-      
+
       case 5: // Conclusion: "Quality Fast Fashion" (Green) - FIXED: Quality has green bg
         return (
           <h2 className="font-display text-4xl md:text-5xl lg:text-7xl font-bold text-black mb-6 leading-[0.9] uppercase tracking-tight">
             <HighlightWord text="Quality" color="#00C040" />
-            Fast Fashion
+            <span> Fast Fashion</span>
           </h2>
         );
 
