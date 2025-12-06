@@ -65,12 +65,11 @@ class AudioService {
       this.initContext();
     }
 
-    if (this.audioContext?.state === 'suspended') {
-      this.audioContext.resume();
-    }
+    if (!this.audioContext) return;
 
-    if (!this.audioContext || this.audioContext.state !== 'running') {
-      return;
+    // Try to resume if suspended (don't block if not running yet)
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(() => {});
     }
 
     try {
