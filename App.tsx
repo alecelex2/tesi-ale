@@ -196,9 +196,9 @@ const App: React.FC = () => {
             <img
               src="/allegati/Logo_Vanvitelli_university.svg.png"
               alt="Università degli Studi della Campania Luigi Vanvitelli"
-              className="h-16 md:h-20 w-auto object-contain invert"
+              className="h-16 md:h-20 w-auto object-contain invert mx-auto md:mx-0"
             />
-            <p className="font-display text-3xl md:text-5xl font-bold text-white italic">
+            <p className="font-display text-3xl md:text-5xl font-bold text-white italic text-center md:text-right">
               Alessio Celentano
             </p>
           </div>

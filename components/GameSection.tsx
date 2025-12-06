@@ -6,8 +6,10 @@ interface GameSectionProps {
 
 const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [isMobileFullscreen, setIsMobileFullscreen] = useState(false);
   const isChatOpenRef = useRef(isChatOpen);
   const gameWrapperRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   // Sync ref with prop for the event listener closure
   useEffect(() => {
@@ -21,12 +23,243 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
     }
   }, [isChatOpen]);
 
+  // Block body scroll when mobile fullscreen is active
+  useEffect(() => {
+    if (isMobileFullscreen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isMobileFullscreen]);
+
+  // Open mobile fullscreen
+  const openMobileGame = () => {
+    setIsMobileFullscreen(true);
+    setTimeout(() => {
+      (window as any).startGame?.();
+    }, 100);
+  };
+
+  // Close mobile fullscreen
+  const closeMobileGame = () => {
+    (window as any).forcePause?.();
+    setIsMobileFullscreen(false);
+  };
+
+  // Touch handlers for swipe controls
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    const minSwipe = 30;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      if (deltaX > minSwipe) {
+        (window as any).changeDirection?.('right');
+      } else if (deltaX < -minSwipe) {
+        (window as any).changeDirection?.('left');
+      }
+    } else {
+      // Vertical swipe
+      if (deltaY > minSwipe) {
+        (window as any).changeDirection?.('down');
+      } else if (deltaY < -minSwipe) {
+        (window as any).changeDirection?.('up');
+      }
+    }
+    touchStartRef.current = null;
+  };
+
+  // Separate effect to initialize mobile game when popup opens
+  useEffect(() => {
+    if (!isMobileFullscreen) return;
+
+    const mobileCanvas = document.getElementById('mobile-snake-canvas') as HTMLCanvasElement;
+    const mobileOverlay = document.getElementById('mobile-game-overlay');
+    const mobilePausedOverlay = document.getElementById('mobile-paused-overlay');
+    const mobileScoreDisplay = document.getElementById('mobile-score');
+    const mobileCO2Display = document.getElementById('mobile-co2');
+
+    if (!mobileCanvas) return;
+
+    const ctx = mobileCanvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    const container = mobileCanvas.parentElement;
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      mobileCanvas.width = rect.width;
+      mobileCanvas.height = rect.height;
+    }
+
+    const gridSize = 20;
+    let tileCountX = Math.floor(mobileCanvas.width / gridSize);
+    let tileCountY = Math.floor(mobileCanvas.height / gridSize);
+
+    let score = 0;
+    let co2 = 0;
+    let snake = [{ x: Math.floor(tileCountX / 2), y: Math.floor(tileCountY / 2) }];
+    let velocity = { x: 1, y: 0 };
+    let food = { x: 15, y: 15, type: 0 };
+    let gameRunning = false;
+    let gamePaused = false;
+    let gameInterval: any;
+
+    const brandImages: HTMLImageElement[] = [];
+    ['https://logo.clearbit.com/zara.com', 'https://logo.clearbit.com/hm.com', 'https://logo.clearbit.com/shein.com', 'https://logo.clearbit.com/asos.com'].forEach(url => {
+      const img = new Image();
+      img.src = url;
+      brandImages.push(img);
+    });
+
+    const playEatSound = () => {
+      try {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) return;
+        const actx = new AudioContext();
+        const osc = actx.createOscillator();
+        const gain = actx.createGain();
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, actx.currentTime);
+        osc.frequency.linearRampToValueAtTime(600, actx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.05, actx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.1);
+        osc.start(actx.currentTime);
+        osc.stop(actx.currentTime + 0.1);
+      } catch (e) {}
+    };
+
+    const placeFood = () => {
+      food.x = Math.floor(Math.random() * (tileCountX - 1));
+      food.y = Math.floor(Math.random() * (tileCountY - 1));
+      food.type = Math.floor(Math.random() * brandImages.length);
+      for (let part of snake) {
+        if (part.x === food.x && part.y === food.y) placeFood();
+      }
+    };
+
+    const drawGame = () => {
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, mobileCanvas.width, mobileCanvas.height);
+      for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i === 0 ? '#ccff00' : '#fff';
+        ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize - 2, gridSize - 2);
+      }
+      const fx = food.x * gridSize;
+      const fy = food.y * gridSize;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(fx, fy, gridSize, gridSize);
+      try {
+        if (brandImages[food.type]?.complete) {
+          ctx.drawImage(brandImages[food.type], fx, fy, gridSize, gridSize);
+        }
+      } catch (e) {}
+    };
+
+    const gameLoop = () => {
+      if (gamePaused) return;
+      const head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
+      if (head.x < 0) head.x = tileCountX - 1;
+      if (head.x >= tileCountX) head.x = 0;
+      if (head.y < 0) head.y = tileCountY - 1;
+      if (head.y >= tileCountY) head.y = 0;
+      for (let i = 0; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
+          resetGame();
+          return;
+        }
+      }
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        playEatSound();
+        score += 10;
+        co2 += 15;
+        if (mobileScoreDisplay) mobileScoreDisplay.innerText = score.toString();
+        if (mobileCO2Display) mobileCO2Display.innerText = co2.toString();
+        placeFood();
+      } else {
+        snake.pop();
+      }
+      drawGame();
+    };
+
+    const resetGame = () => {
+      gameRunning = false;
+      gamePaused = false;
+      clearInterval(gameInterval);
+      if (mobileOverlay) {
+        mobileOverlay.style.display = 'flex';
+        mobileOverlay.innerHTML = `
+          <h3 class="text-2xl font-black mb-2" style="color:#ff2a2a">GAME OVER</h3>
+          <p class="text-white text-sm">SCORE: ${score}</p>
+          <p class="text-[#ff2a2a] font-bold text-sm">CO2: ${co2}kg</p>
+          <button onclick="window.startMobileGame()" class="bg-[#ccff00] text-black font-bold py-2 px-6 text-lg border-2 border-white font-syne uppercase mt-4">RETRY</button>
+        `;
+      }
+    };
+
+    (window as any).startMobileGame = () => {
+      if (gameRunning && !gamePaused) return;
+      gameRunning = true;
+      gamePaused = false;
+      if (mobileOverlay) mobileOverlay.style.display = 'none';
+      if (mobilePausedOverlay) mobilePausedOverlay.style.display = 'none';
+      score = 0;
+      co2 = 0;
+      snake = [{ x: Math.floor(tileCountX / 2), y: Math.floor(tileCountY / 2) }];
+      velocity = { x: 1, y: 0 };
+      if (mobileScoreDisplay) mobileScoreDisplay.innerText = '0';
+      if (mobileCO2Display) mobileCO2Display.innerText = '0';
+      placeFood();
+      if (gameInterval) clearInterval(gameInterval);
+      gameInterval = setInterval(gameLoop, 120);
+    };
+
+    // Override changeDirection for mobile
+    const originalChangeDirection = (window as any).changeDirection;
+    (window as any).changeDirection = (dir: string) => {
+      if (!gameRunning) (window as any).startMobileGame?.();
+      switch (dir) {
+        case 'left': if (velocity.x !== 1) velocity = { x: -1, y: 0 }; break;
+        case 'up': if (velocity.y !== 1) velocity = { x: 0, y: -1 }; break;
+        case 'right': if (velocity.x !== -1) velocity = { x: 1, y: 0 }; break;
+        case 'down': if (velocity.y !== -1) velocity = { x: 0, y: 1 }; break;
+      }
+    };
+
+    drawGame();
+
+    return () => {
+      clearInterval(gameInterval);
+      if (originalChangeDirection) {
+        (window as any).changeDirection = originalChangeDirection;
+      }
+    };
+  }, [isMobileFullscreen]);
+
   useEffect(() => {
     // Initialize Game Logic
     const initGame = () => {
         const canvas = document.getElementById('snake-canvas') as HTMLCanvasElement;
         const gameContainerWrapper = document.getElementById('game-container-wrapper');
-        
+
         if (!canvas || !gameContainerWrapper) return;
 
         const ctxGame = canvas.getContext('2d');
@@ -361,14 +594,16 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
             const isClickInside = gameWrapper.contains(event.target as Node);
             const isOverlay = overlay.contains(event.target as Node);
             const isPauseBtn = (event.target as Element).closest('button[title="Pause Game"]');
+            const isMobileControl = (event.target as Element).closest('[data-mobile-control]');
+            const isMobileUI = (event.target as Element).closest('[data-mobile-ui]');
 
             // Explicitly focus game wrapper if clicked inside
             if (isClickInside || isOverlay) {
                 gameWrapper.focus();
             }
 
-            // Pause if clicking outside while running
-            if (!isClickInside && !isOverlay && !isPauseBtn && gameRunning && !gamePaused) {
+            // Pause if clicking outside while running (but NOT on mobile controls)
+            if (!isClickInside && !isOverlay && !isPauseBtn && !isMobileControl && !isMobileUI && gameRunning && !gamePaused) {
                 (window as any).togglePause();
             }
         };
@@ -531,23 +766,20 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
                             </div>
                         </div>
 
-                        {/* Controlli Mobile */}
-                        <div className="grid grid-cols-3 gap-3 mt-4 lg:hidden">
-                            <div></div>
-                            <button onTouchStart={(e) => { e.preventDefault(); (window as any).changeDirection('up'); }} onClick={() => (window as any).changeDirection('up')} className="bg-[#ccff00] text-black font-bold py-4 text-2xl border-2 border-white rounded shadow-[4px_4px_0px_white] active:translate-y-1 active:shadow-none touch-manipulation">▲</button>
-                            <div></div>
-                            <button onTouchStart={(e) => { e.preventDefault(); (window as any).changeDirection('left'); }} onClick={() => (window as any).changeDirection('left')} className="bg-[#ccff00] text-black font-bold py-4 text-2xl border-2 border-white rounded shadow-[4px_4px_0px_white] active:translate-y-1 active:shadow-none touch-manipulation">◀</button>
-                            <button onTouchStart={(e) => { e.preventDefault(); (window as any).changeDirection('down'); }} onClick={() => (window as any).changeDirection('down')} className="bg-[#ccff00] text-black font-bold py-4 text-2xl border-2 border-white rounded shadow-[4px_4px_0px_white] active:translate-y-1 active:shadow-none touch-manipulation">▼</button>
-                            <button onTouchStart={(e) => { e.preventDefault(); (window as any).changeDirection('right'); }} onClick={() => (window as any).changeDirection('right')} className="bg-[#ccff00] text-black font-bold py-4 text-2xl border-2 border-white rounded shadow-[4px_4px_0px_white] active:translate-y-1 active:shadow-none touch-manipulation">▶</button>
-                        </div>
+                        {/* Pulsante Gioca Mobile */}
+                        <button
+                            onClick={openMobileGame}
+                            className="lg:hidden w-full bg-[#ccff00] text-black font-bold py-4 text-xl border-4 border-white rounded shadow-[6px_6px_0px_white] active:translate-y-1 active:shadow-none touch-manipulation mt-4 font-syne uppercase"
+                        >
+                            🎮 GIOCA ORA
+                        </button>
                     </div>
 
-                    {/* COLONNA DX: AREA GIOCO RESPONSIVE */}
-                    <div 
+                    {/* COLONNA DX: AREA GIOCO RESPONSIVE - Desktop only */}
+                    <div
                         ref={gameWrapperRef}
-                        // Added w-full and responsive aspect ratio to fix stretching
-                        className="lg:col-span-2 relative w-full aspect-[3/2] border-4 border-white order-1 lg:order-2 bg-black transition-all cursor-pointer" 
-                        id="game-container-wrapper" 
+                        className="hidden lg:block lg:col-span-2 relative w-full aspect-[3/2] border-4 border-white bg-black transition-all cursor-pointer order-1 lg:order-2"
+                        id="game-container-wrapper"
                         tabIndex={0}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
@@ -577,6 +809,106 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
             </div>
         </div>
     </section>
+
+    {/* MOBILE POPUP GAME */}
+    {isMobileFullscreen && (
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 lg:hidden"
+        style={{ backdropFilter: 'blur(10px)', backgroundColor: 'rgba(0,0,0,0.7)' }}
+      >
+        {/* Popup Container */}
+        <div
+          data-mobile-ui
+          className="relative w-full max-w-md bg-[#1a1a1a] border-4 border-[#ccff00] rounded-lg overflow-hidden shadow-[0_0_40px_rgba(212,255,0,0.3)]"
+          style={{ maxHeight: '90vh' }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-3 bg-black border-b-2 border-[#ccff00]">
+            <h3 className="text-[#ccff00] font-bold font-syne text-sm uppercase">🐍 Snake Game</h3>
+            <button
+              data-mobile-ui
+              onClick={closeMobileGame}
+              className="bg-[#ff2a2a] text-white w-8 h-8 flex items-center justify-center text-lg font-bold border-2 border-white rounded"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Score Bar */}
+          <div className="flex items-center justify-around p-2 bg-black/50 border-b border-gray-700">
+            <div className="text-[#ccff00] font-bold font-mono text-sm">
+              SCORE: <span id="mobile-score" className="text-white">0</span>
+            </div>
+            <div className="text-[#ff2a2a] font-bold font-mono text-sm">
+              CO2: <span id="mobile-co2" className="text-white">0</span>kg
+            </div>
+          </div>
+
+          {/* Game Canvas Area */}
+          <div
+            className="relative bg-black"
+            style={{ aspectRatio: '4/5', touchAction: 'none' }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <canvas
+              id="mobile-snake-canvas"
+              className="w-full h-full"
+              style={{ imageRendering: 'pixelated' }}
+            />
+
+            {/* Start Overlay */}
+            <div id="mobile-game-overlay" className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center">
+              <h3 className="text-2xl font-black text-[#ccff00] mb-2 font-syne">SWIPE TO PLAY</h3>
+              <p className="text-white text-xs mb-4">Scorri per muovere il serpente</p>
+              <button
+                onClick={() => (window as any).startMobileGame?.()}
+                className="bg-[#ccff00] text-black font-bold py-2 px-6 text-lg border-2 border-white font-syne uppercase"
+              >
+                START
+              </button>
+            </div>
+
+            {/* Paused Overlay */}
+            <div id="mobile-paused-overlay" className="absolute inset-0 bg-black/80 hidden flex-col items-center justify-center">
+              <p className="text-[#ff2a2a] text-2xl font-bold font-syne">PAUSED</p>
+            </div>
+          </div>
+
+          {/* D-Pad Controls */}
+          <div
+            data-mobile-control
+            className="p-3 bg-black border-t-2 border-[#ccff00]"
+            style={{ touchAction: 'none' }}
+          >
+            <div className="grid grid-cols-3 gap-2 max-w-[160px] mx-auto">
+              <div></div>
+              <button
+                data-mobile-control
+                onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); (window as any).changeDirection?.('up'); }}
+                className="bg-[#ccff00] text-black font-bold py-3 text-xl border-2 border-white active:bg-white touch-manipulation rounded"
+              >▲</button>
+              <div></div>
+              <button
+                data-mobile-control
+                onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); (window as any).changeDirection?.('left'); }}
+                className="bg-[#ccff00] text-black font-bold py-3 text-xl border-2 border-white active:bg-white touch-manipulation rounded"
+              >◀</button>
+              <button
+                data-mobile-control
+                onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); (window as any).changeDirection?.('down'); }}
+                className="bg-[#ccff00] text-black font-bold py-3 text-xl border-2 border-white active:bg-white touch-manipulation rounded"
+              >▼</button>
+              <button
+                data-mobile-control
+                onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); (window as any).changeDirection?.('right'); }}
+                className="bg-[#ccff00] text-black font-bold py-3 text-xl border-2 border-white active:bg-white touch-manipulation rounded"
+              >▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 };

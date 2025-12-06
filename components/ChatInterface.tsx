@@ -176,11 +176,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onOpenChange }) =
     <>
       {/* Toggle Button */}
       <motion.button
-        className="fixed bottom-4 right-4 z-50 bg-genz-neon text-black p-3 md:p-4 border-2 border-black shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+        className="fixed bottom-4 right-4 z-50 bg-genz-neon text-black p-4 md:p-5 border-2 border-black shadow-brutal hover:shadow-brutal-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
         onClick={toggleOpen}
         whileTap={{ scale: 0.95 }}
       >
-        {isOpen ? <X size={24} strokeWidth={3} /> : <MessageSquare size={24} strokeWidth={3} />}
+        {isOpen ? <X size={28} strokeWidth={3} /> : <MessageSquare size={28} strokeWidth={3} />}
       </motion.button>
 
       {/* Chat Window */}
@@ -342,8 +342,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onOpenChange }) =
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Scrivi a LEXAWRLD_AI..."
-                    className="w-full bg-white text-black border-2 border-black px-4 py-3 text-sm font-bold placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:bg-gray-50 transition-all"
+                    className="w-full bg-white text-black border-2 border-black px-4 py-3 text-base md:text-sm font-bold placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:bg-gray-50 transition-all"
                     disabled={isLoading}
+                    style={{ fontSize: '16px' }}
                   />
                 </div>
 
