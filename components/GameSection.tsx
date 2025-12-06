@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { audioService } from '../services/audioService';
 
 interface GameSectionProps {
   isChatOpen: boolean;
@@ -128,22 +129,7 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
     });
 
     const playEatSound = () => {
-      try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) return;
-        const actx = new AudioContext();
-        const osc = actx.createOscillator();
-        const gain = actx.createGain();
-        osc.connect(gain);
-        gain.connect(actx.destination);
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(200, actx.currentTime);
-        osc.frequency.linearRampToValueAtTime(600, actx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.05, actx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.1);
-        osc.start(actx.currentTime);
-        osc.stop(actx.currentTime + 0.1);
-      } catch (e) {}
+      audioService.play('eat');
     };
 
     const placeFood = () => {
@@ -327,60 +313,13 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
 
         // --- GLOBAL FUNCTIONS ---
 
-        // SOUND EFFECT GENERATOR
+        // SOUND EFFECT GENERATOR (using centralized service for iOS compatibility)
         const playEatSound = () => {
-            try {
-                const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-                if (!AudioContext) return;
-                
-                const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                // Retro 'Coin/Eat' Sound (Square Wave)
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(200, ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(600, ctx.currentTime + 0.1);
-
-                // Envelope
-                gain.gain.setValueAtTime(0.05, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-
-                osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 0.1);
-            } catch (e) {
-                // Ignore audio context errors
-            }
+            audioService.play('eat');
         };
 
         const playGameOverSound = () => {
-            try {
-                const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-                if (!AudioContext) return;
-                
-                const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                // 'Loser' / Power Down Sound (Sawtooth pitching down)
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(10, ctx.currentTime + 1);
-
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
-
-                osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 1);
-            } catch (e) {
-                // Ignore errors
-            }
+            audioService.play('gameOver');
         };
 
         (window as any).startGame = function() {

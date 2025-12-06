@@ -15,6 +15,7 @@ const NAV_ITEMS = [
 
 const Header: React.FC = () => {
   const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [isMobileActive, setIsMobileActive] = useState(false);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -23,20 +24,38 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleLogoClick = () => {
+    // On mobile, toggle the color animation
+    if (window.innerWidth < 768) {
+      setIsMobileActive(!isMobileActive);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Combined state for coloring (either hover on desktop or click on mobile)
+  const isActive = isLogoHovered || isMobileActive;
+
   return (
     <nav
       className="fixed top-2 left-0 right-0 z-40 px-4"
     >
       <div className="container mx-auto">
         <div className="bg-white border-2 border-black shadow-[4px_4px_0px_#000] px-4 py-3 flex items-center justify-between">
-          {/* Logo with expanding text */}
+          {/* Logo with expanding text on desktop, color change on mobile */}
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={handleLogoClick}
             onMouseEnter={() => setIsLogoHovered(true)}
             onMouseLeave={() => setIsLogoHovered(false)}
             className="font-display text-2xl md:text-3xl font-black text-black transition-colors overflow-hidden cursor-pointer"
           >
-            <span className="inline-flex">
+            {/* Mobile version: just FFS? with S and ? colored on click */}
+            <span className="inline-flex md:hidden">
+              <span>FF</span>
+              <span className={`transition-colors duration-300 ${isMobileActive ? 'text-[#FF2A2A]' : ''}`}>S?</span>
+            </span>
+
+            {/* Desktop version: expanding text on hover */}
+            <span className="hidden md:inline-flex">
               <span>F</span>
               <AnimatePresence mode="wait">
                 {isLogoHovered ? (

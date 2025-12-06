@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Leaf, Zap, DollarSign, BarChart3 } from 'lucide-react';
+import { audioService } from '../services/audioService';
 
 type ComparisonMetric = 'speed' | 'sustainability' | 'price' | 'digital';
 
@@ -46,98 +47,22 @@ const DATA: Record<ComparisonMetric, DataPoint> = {
 const ComparisonSection: React.FC = () => {
   const [activeMetric, setActiveMetric] = useState<ComparisonMetric>('speed');
 
-  // --- AUDIO SFX ENGINE ---
+  // --- AUDIO SFX ENGINE (using centralized service for iOS compatibility) ---
   const playMetricSound = (metric: ComparisonMetric) => {
-    try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
-      const now = ctx.currentTime;
-
-      switch (metric) {
-        case 'speed': // Whoosh / Speed
-          const oscS = ctx.createOscillator();
-          const gainS = ctx.createGain();
-          oscS.type = 'sawtooth';
-          oscS.frequency.setValueAtTime(150, now);
-          oscS.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
-          gainS.gain.setValueAtTime(0.08, now);
-          gainS.gain.linearRampToValueAtTime(0, now + 0.25);
-          oscS.connect(gainS);
-          gainS.connect(ctx.destination);
-          oscS.start(now);
-          oscS.stop(now + 0.3);
-          break;
-
-        case 'sustainability': // Ethics - Sparkling/Chime (C Major Arpeggio)
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => { 
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + (i * 0.05));
-            gain.gain.setValueAtTime(0.05, now + (i * 0.05));
-            gain.gain.exponentialRampToValueAtTime(0.001, now + (i * 0.05) + 0.5);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(now + (i * 0.05));
-            osc.stop(now + (i * 0.05) + 0.5);
-          });
-          break;
-
-        case 'price': // Cash register / Cha-ching
-          const oscP1 = ctx.createOscillator();
-          const gainP1 = ctx.createGain();
-          oscP1.type = 'square';
-          oscP1.frequency.setValueAtTime(1200, now);
-          gainP1.gain.setValueAtTime(0.05, now);
-          gainP1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-          oscP1.connect(gainP1);
-          gainP1.connect(ctx.destination);
-          oscP1.start(now);
-          oscP1.stop(now + 0.08);
-
-          const oscP2 = ctx.createOscillator();
-          const gainP2 = ctx.createGain();
-          oscP2.type = 'square';
-          oscP2.frequency.setValueAtTime(2400, now + 0.1); // Higher pitch second beep
-          gainP2.gain.setValueAtTime(0.05, now + 0.1);
-          gainP2.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-          oscP2.connect(gainP2);
-          gainP2.connect(ctx.destination);
-          oscP2.start(now + 0.1);
-          oscP2.stop(now + 0.4);
-          break;
-
-        case 'digital': // Rocket / Takeoff
-          const oscD = ctx.createOscillator();
-          const gainD = ctx.createGain();
-          oscD.type = 'sawtooth';
-          // Low rumble to high pitch
-          oscD.frequency.setValueAtTime(50, now);
-          oscD.frequency.exponentialRampToValueAtTime(800, now + 0.6);
-          
-          // LFO for "rumble" texture
-          const lfo = ctx.createOscillator();
-          lfo.type = 'square';
-          lfo.frequency.value = 40; 
-          const lfoGain = ctx.createGain();
-          lfoGain.gain.value = 50; 
-          lfo.connect(lfoGain);
-          lfoGain.connect(oscD.frequency);
-          lfo.start(now);
-          lfo.stop(now + 0.6);
-
-          gainD.gain.setValueAtTime(0.1, now);
-          gainD.gain.linearRampToValueAtTime(0, now + 0.6);
-          
-          oscD.connect(gainD);
-          gainD.connect(ctx.destination);
-          oscD.start(now);
-          oscD.stop(now + 0.6);
-          break;
-      }
-    } catch (e) {
-      console.error("Audio error", e);
+    // Use different sounds for each metric type
+    switch (metric) {
+      case 'speed':
+        audioService.play('swoosh');
+        break;
+      case 'sustainability':
+        audioService.play('receive');
+        break;
+      case 'price':
+        audioService.play('click');
+        break;
+      case 'digital':
+        audioService.play('send');
+        break;
     }
   };
 

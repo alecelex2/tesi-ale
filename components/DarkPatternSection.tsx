@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { Eye, Clock, ShoppingBag, Flame, AlertTriangle, Zap, AlertOctagon } from 'lucide-react';
+import { audioService } from '../services/audioService';
 
 const DarkPatternSection: React.FC = () => {
   const [isToxicMode, setIsToxicMode] = useState(false);
@@ -21,75 +22,13 @@ const DarkPatternSection: React.FC = () => {
   // Fake User Names for Social Proof
   const fakeUsers = ['Giulia da Milano', 'Marco da Roma', 'Sara da Londra', 'Emma da Berlino', 'Luca da Torino'];
 
-  // --- AUDIO ENGINE: DATA PROCESS SOUND ---
+  // --- AUDIO ENGINE (using centralized service for iOS compatibility) ---
   const playDataSound = () => {
-    try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) return;
-        
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        // Mechanical click sound
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(200 + Math.random() * 800, ctx.currentTime);
-        
-        gain.gain.setValueAtTime(0.02, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.03);
-    } catch (e) {
-        // Ignore audio errors
-    }
+    audioService.play('data');
   };
 
-  // --- AUDIO ENGINE: TOXIC SWITCH SOUND ---
   const playToxicSwitchSound = (activating: boolean) => {
-    try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) return;
-        
-        const ctx = new AudioContext();
-        const now = ctx.currentTime;
-        
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        
-        if (activating) {
-            // HARSH ALARM SOUND (Sawtooth ramping up)
-            osc.type = 'sawtooth'; 
-            osc.frequency.setValueAtTime(200, now);
-            osc.frequency.linearRampToValueAtTime(800, now + 0.1); // Rise fast
-            osc.frequency.linearRampToValueAtTime(600, now + 0.3); // Drop slightly
-            
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-
-            osc.start(now);
-            osc.stop(now + 0.3);
-        } else {
-            // RELIEF / POWER DOWN SOUND (Sine ramping down)
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, now);
-            osc.frequency.exponentialRampToValueAtTime(100, now + 0.4);
-            
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.4);
-            
-            osc.start(now);
-            osc.stop(now + 0.4);
-        }
-    } catch(e) {
-        // Ignore audio errors
-    }
+    audioService.play(activating ? 'toxicOn' : 'toxicOff');
   };
 
   // --- GLITCH / DECODE EFFECT LOGIC ---

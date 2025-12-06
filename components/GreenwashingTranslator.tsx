@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { ScanEye, AlertTriangle, XCircle, Info, MousePointer2, Megaphone, Terminal } from 'lucide-react';
+import { audioService } from '../services/audioService';
 
 interface GreenwashingTerm {
   id: string;
@@ -57,54 +58,13 @@ const GreenwashingTranslator: React.FC = () => {
   const textContainerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(textContainerRef, { once: true, margin: "-100px" });
 
-  // --- AUDIO ENGINE ---
+  // --- AUDIO ENGINE (using centralized service for iOS compatibility) ---
   const playGlitchSound = () => {
-    try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(100, ctx.currentTime);
-      osc.frequency.linearRampToValueAtTime(50, ctx.currentTime + 0.1);
-      
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } catch (e) {}
+    audioService.play('hit');
   };
 
   const playKeystrokeSound = () => {
-    try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        // Mechanical Key Switch Sound Simulation
-        // Square wave + fast pitch drop = clicky feeling
-        osc.type = 'square';
-        // Slightly randomize pitch for realism
-        const randomPitch = 600 + Math.random() * 200; 
-        osc.frequency.setValueAtTime(randomPitch, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.05);
-
-        // Short envelope
-        gain.gain.setValueAtTime(0.02, ctx.currentTime); // Low volume
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.05);
-    } catch(e) {}
+    audioService.play('click');
   };
 
   // Typewriter Logic - FASTER VERSION

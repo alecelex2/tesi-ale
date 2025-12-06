@@ -40,7 +40,7 @@ const App: React.FC = () => {
       <Header />
 
       {/* --- HERO SECTION --- */}
-      <header className="min-h-[70vh] md:min-h-screen flex flex-col justify-between relative overflow-hidden bg-white border-b-2 border-black">
+      <header className="min-h-[80vh] md:min-h-screen flex flex-col justify-between relative overflow-hidden bg-white border-b-2 border-black">
         {/* Grid Background Pattern */}
         <div className="absolute inset-0 z-0 opacity-10" 
              style={{ 
@@ -49,7 +49,7 @@ const App: React.FC = () => {
              }}>
         </div>
 
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 md:px-12 pt-20">
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 md:px-12 pt-12 md:pt-20">
           <motion.div 
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
