@@ -5,6 +5,32 @@ import { audioService } from '../services/audioService';
 import { Send, Loader2, ImagePlus, BrainCircuit, X, Sparkles, MessageSquare, Square } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Easter Eggs - Secret Commands
+const EASTER_EGGS: Record<string, string> = {
+  '/konami': '⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️🅱️🅰️\n\n🎮 CHEAT CODE ACTIVATED!\n+30 vite\n+∞ sostenibilità\n-100% fast fashion\n\nCongratulazioni, hai sbloccato la coscienza etica! 🏆',
+  'up up down down left right left right b a': '⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️🅱️🅰️\n\n🎮 KONAMI CODE DETECTED!\nSei un vero gamer old school! 👾\n\nFun fact: Questo codice fu creato da Kazuhisa Hashimoto nel 1986 per Gradius.',
+  '42': '🌌 La risposta alla domanda fondamentale sulla vita, l\'universo e tutto quanto!\n\nMa qual era la domanda? Forse: "Quanti capi compra in media una persona da Shein all\'anno?"\n\n...no aspetta, quella risposta è molto più triste. 😅\n\n📚 Douglas Adams approva questo messaggio.',
+  'hello world': '```python\nprint("Hello, sustainable world!")\n# TODO: fix fast_fashion.destroy()\n# BUG: capitalism.exe has stopped working\n```\n\n👨‍💻 Ah, un programmatore! Benvenuto nel club. Il codice della moda sostenibile è ancora in beta...',
+  '/matrix': '🔴 Pillola rossa: scopri quanto costa davvero un vestito da 5€\n🔵 Pillola blu: continua a credere che Shein sia "affordable fashion"\n\n⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\nWake up, Neo...\nThe fast fashion has you.\n⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛\n\n🐇 Follow the sustainable rabbit.',
+  'chi ti ha creato': '👨‍🎓 Sono stata creata da **Alessio Celentano** per la sua tesi di laurea!\n\nLa tesi esplora il mondo del fast fashion, il greenwashing e le strategie dei brand nel metaverso.\n\nSono basata su Gemini AI, ma il mio stile e la mia personalità sono stati plasmati per questa ricerca. ✨\n\n...e no, non sono parente di Adriano Celentano 🎤😄',
+  'chi ti ha creato?': '👨‍🎓 Sono stata creata da **Alessio Celentano** per la sua tesi di laurea!\n\nLa tesi esplora il mondo del fast fashion, il greenwashing e le strategie dei brand nel metaverso.\n\nSono basata su Gemini AI, ma il mio stile e la mia personalità sono stati plasmati per questa ricerca. ✨\n\n...e no, non sono parente di Adriano Celentano 🎤😄',
+  '/help': '🔮 **Easter Eggs Segreti**\n\nHai trovato il menu nascosto! Ecco alcuni hint:\n\n• Prova un famoso codice da videogiochi...\n• Il numero che risponde a tutto\n• Il primo programma di ogni dev\n• Una pillola rossa o blu?\n• Chiedi delle mie origini\n\nBuona caccia! 🎯',
+  'sus': '📮 AMOGUS?!\n\n⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⣤⣤⣤⣤⣤⣤⣀\n⠀⠀⠀⠀⠀⠀⠀⣀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷\n⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷\n\nShein è un po\' sus però... 👀',
+  '/credits': '🎬 **CREDITS**\n\n📝 Tesi: Alessio Celentano\n🤖 AI: Google Gemini + custom prompt\n🎨 Design: Brutalist + Gen-Z aesthetic\n🎮 Game: Inspired by retro arcade\n💻 Tech: React + TypeScript + Vite\n\n🎵 Soundtrack: 8-bit vibes\n☕ Powered by: troppi caffè\n\n© 2024 - Made with 💚 for sustainability',
+};
+
+// Check if input matches any easter egg (case insensitive)
+const checkEasterEgg = (input: string): string | null => {
+  const normalizedInput = input.toLowerCase().trim();
+
+  for (const [trigger, response] of Object.entries(EASTER_EGGS)) {
+    if (normalizedInput === trigger.toLowerCase()) {
+      return response;
+    }
+  }
+  return null;
+};
+
 interface ChatInterfaceProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -71,18 +97,41 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onOpenChange }) =
     };
 
     setMessages(prev => [...prev, userMsg]);
+    const currentInput = input;
     setInput('');
+
+    // Check for easter eggs first (only if no image attached)
+    const easterEggResponse = !selectedImage ? checkEasterEgg(currentInput) : null;
+
+    if (easterEggResponse) {
+      // Easter egg found - respond instantly without API call
+      setSelectedImage(null);
+
+      // Small delay to simulate typing
+      setTimeout(() => {
+        const aiMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: Role.MODEL,
+          text: easterEggResponse,
+        };
+        setMessages(prev => [...prev, aiMsg]);
+        playRetroSound('receive');
+      }, 300);
+
+      return;
+    }
+
     setIsLoading(true);
-    
+
     // Temporary image hold for API call
     const imageToSend = selectedImage;
     setSelectedImage(null);
 
     try {
       const responseText = await sendMessageToGemini(
-        messages, 
-        userMsg.text || "Analizza questa immagine nel contesto della tesi.", 
-        imageToSend, 
+        messages,
+        userMsg.text || "Analizza questa immagine nel contesto della tesi.",
+        imageToSend,
         { useThinking }
       );
 
