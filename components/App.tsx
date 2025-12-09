@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { SECTIONS } from './constants';
-import Section from './components/Section';
-import ChatInterface from './components/ChatInterface';
-import ComparisonSection from './components/ComparisonSection';
-import GreenwashingTranslator from './components/GreenwashingTranslator';
-import DarkPatternSection from './components/DarkPatternSection';
-import GameSection from './components/GameSection';
+import { SECTIONS } from '../constants';
+import Section from './Section';
+import ChatInterface from './ChatInterface';
+import ComparisonSection from './ComparisonSection';
+import GreenwashingTranslator from './GreenwashingTranslator';
+import DarkPatternSection from './DarkPatternSection';
+import GameSection from './GameSection';
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { ArrowDown, AlertOctagon } from 'lucide-react';
 

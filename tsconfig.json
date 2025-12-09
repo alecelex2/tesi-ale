@@ -24,6 +24,20 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "baseUrl": ".",
+    "strict": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "*.ts",
+    "*.tsx",
+    "components/**/*",
+    "services/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

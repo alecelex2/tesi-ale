@@ -17,6 +17,9 @@ const EASTER_EGGS: Record<string, string> = {
   '/help': '🔮 **Easter Eggs Segreti**\n\nHai trovato il menu nascosto! Ecco alcuni hint:\n\n• Prova un famoso codice da videogiochi...\n• Il numero che risponde a tutto\n• Il primo programma di ogni dev\n• Una pillola rossa o blu?\n• Chiedi delle mie origini\n\nBuona caccia! 🎯',
   'sus': '📮 AMOGUS?!\n\n⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⣤⣤⣤⣤⣤⣤⣀\n⠀⠀⠀⠀⠀⠀⠀⣀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷\n⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷\n\nShein è un po\' sus però... 👀',
   '/credits': '🎬 **CREDITS**\n\n📝 Tesi: Alessio Celentano\n🤖 AI: Google Gemini + custom prompt\n🎨 Design: Brutalist + Gen-Z aesthetic\n🎮 Game: Inspired by retro arcade\n💻 Tech: React + TypeScript + Vite\n\n🎵 Soundtrack: 8-bit vibes\n☕ Powered by: troppi caffè\n\n© 2024 - Made with 💚 for sustainability',
+
+  // Easter Eggs personali - Amici
+  '/modesto': '🇫🇷 **PARIGI, 2024**\n\n"Ciao amico! Bello braccialetto, vero?"\n\n💸 -20€\n🎭 +1 lezione di vita\n📍 Location: Montmartre\n\nLa vera truffa non è il fast fashion...\nè fidarsi di chi ti lega un braccialetto al polso. 🪢\n\n**(Press F per Modesto)** 🫡\n\nRicorda: se qualcuno ti ferma per strada a Parigi, CORRI.',
 };
 
 // Check if input matches any easter egg (case insensitive)
