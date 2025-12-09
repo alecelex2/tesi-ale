@@ -20,6 +20,10 @@ const EASTER_EGGS: Record<string, string> = {
 
   // Easter Eggs personali - Amici
   '/modesto': '🇫🇷 **PARIGI, 2024**\n\n"Ciao amico! Bello braccialetto, vero?"\n\n💸 -20€\n🎭 +1 lezione di vita\n📍 Location: Montmartre\n\nLa vera truffa non è il fast fashion...\nè fidarsi di chi ti lega un braccialetto al polso. 🪢\n\n**(Press F per Modesto)** 🫡\n\nRicorda: se qualcuno ti ferma per strada a Parigi, CORRI.',
+
+  '/giuliano': '🎵 **CALCUTTA - FROSINONE** 🎵\n\n🍕 Mangio la pizza e sono il solo sveglio\nIn tutta la città\nBevo un bicchiere per pensare al meglio\nPer rivivere lo stesso sbaglio\n\nA mezzanotte ne ho commessi un paio\nChe ridere che fa\nMangio la pizza e sono il solo sveglio\nIn tutta la città\n\n📰 Ti chiedo scusa se non è lo stesso\nDi tanti anni fa\nLeggo il giornale e c\'è papa Francesco\nE il **Frosinone in serie A**\n\n🏃 Io ti giuro che torno a casa e mi guardo un film\nL\'ultimo dei Mohicani, non so di chi\nIo ti giuro che torno a casa e non so di chi...\n\n💔 *dedicato a chi ha il cuore a Frosinone*',
+
+  '/giovanna': '👓 **GLI OCCHIALI DEL GIUDIZIO** 👓\n\n*\\*si mette gli occhiali\\**\nMmh... vedo... vedo giudizio ovunque.\n\n🚌 **Memories:**\n• Tornare col pullman insieme solo per farti compagnia\n• La **cunocchia di Curti** (leggendaria)\n• Serate da **Hygge** a parlare di tutto e niente\n• Shopping compulsivo da **Action** (serviva? no. comprato? sì.)\n\n🍰 **I tuoi dolci:**\nMorbidissimi. Per nulla secchi. Mai.\nUna goduria per il palato.\n*\\*si toglie gli occhiali del giudizio\\**\n...ok forse un po\' secchi. 🏜️\n\n💚 *Ma sempre fatti col cuore!*',
 };
 
 // Check if input matches any easter egg (case insensitive)
