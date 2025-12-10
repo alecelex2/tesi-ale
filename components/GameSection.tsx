@@ -123,8 +123,10 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
     let gamePaused = false;
     let gameInterval: any;
 
+    // Loghi Brand - PNG locali
+    const logoUrls = ['/logos/zara.png', '/logos/hm.png', '/logos/shein.png', '/logos/asos.png'];
     const brandImages: HTMLImageElement[] = [];
-    ['https://logo.clearbit.com/zara.com', 'https://logo.clearbit.com/hm.com', 'https://logo.clearbit.com/shein.com', 'https://logo.clearbit.com/asos.com'].forEach(url => {
+    logoUrls.forEach(url => {
       const img = new Image();
       img.src = url;
       brandImages.push(img);
@@ -301,15 +303,9 @@ const GameSection: React.FC<GameSectionProps> = ({ isChatOpen }) => {
         let gamePaused = false;
         let gameInterval: any;
 
-        // Loghi Reali - Lista aggiornata: Zara, H&M, Shein, ASOS (No Pull&Bear)
+        // Loghi Brand - PNG locali
+        const logoUrls = ['/logos/zara.png', '/logos/hm.png', '/logos/shein.png', '/logos/asos.png'];
         const brandImages: HTMLImageElement[] = [];
-        const logoUrls = [
-            'https://logo.clearbit.com/zara.com',
-            'https://logo.clearbit.com/hm.com',
-            'https://logo.clearbit.com/shein.com',
-            'https://logo.clearbit.com/asos.com'
-        ];
-        
         logoUrls.forEach(url => {
             const img = new Image();
             img.src = url;
