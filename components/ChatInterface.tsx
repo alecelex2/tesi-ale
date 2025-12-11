@@ -114,6 +114,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onOpenChange }) =
       // Easter egg found - respond instantly without API call
       setSelectedImage(null);
 
+      // Track easter egg activation in GA4
+      const now = new Date();
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'easter_egg_activated', {
+          easter_egg_name: currentInput.toLowerCase().trim(),
+          activation_date: now.toLocaleDateString('it-IT'),
+          activation_time: now.toLocaleTimeString('it-IT'),
+          activation_timestamp: now.toISOString(),
+        });
+      }
+
       // Small delay to simulate typing
       setTimeout(() => {
         const aiMsg: Message = {
